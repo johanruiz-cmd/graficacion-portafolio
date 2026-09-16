@@ -1,0 +1,46 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <title>Mi primer dibujo CSS</title>
+  <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+
+  <!-- BASES DEL TREN  -->
+  <div class="Tren">  <!-- clase -->
+    <div class="cuerpo"></div>  <!--izquierda -->
+    <div class="cabina"></div> <!--derecha -->
+    <div class="rueda1"></div>  
+    <div class="ruedacentro1"></div>  
+     <div class="rueda2"></div>  
+     <div class="ruedacentro2"></div>
+     <div class="rueda3"><div class="ruedacentro"></div></div>
+     <div class="rueda4"><div class="ruedacentro"></div></div>
+     <div class="ventana"></div>
+     <div class="tanque"></div>
+     <div class="chimenea1"></div>
+     <div class="expulsor"></div>
+     <div class="triangulo-contenedor">
+  <div class="triangulo"></div>
+   <div class="punta-contenedor">
+  <div class="punta"></div>
+  <div class="techo-contenedor">
+  <div class="techo">
+    <!-- Tres triángulos arriba apuntando hacia abajo o alternados -->
+    <div class="t-techo t1"></div>
+    <div class="t-techo t2"></div>
+    <div class="t-techo t3"></div>
+  </div>
+  <!-- Punta horizontal que sale del cuerpo -->
+<div class="punta-frente-contenedor">
+  <div class="punta-frente"></div>
+</div>
+<!-- Deflector de abajo (apunta hacia abajo/izquierda) -->
+<div class="deflector-contenedor">
+  <div class="deflector"></div>
+</div>
+  </div>
+
+</body>
+</html>
