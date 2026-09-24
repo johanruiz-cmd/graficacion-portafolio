@@ -1,1 +1,166 @@
+//  Big Ben 
+let bigBenX = 220; 
+
+function setup() {
+  createCanvas(500, 700);
+  angleMode(DEGREES);
+}
+
+function draw() {
+  // 1. FONDO NOCTURNO
+  background(10, 25, 60);
+
+  // 2. CELESTE Y ONDAS DEL CIELO
+  drawCieloEstrellado();
+
+  // 3. SILUETAS DE EDIFICIOS SECUNDARIOS
+  drawEdificiosFondo();
+
+  // 4. BIG BEN (Pieza Principal)
+  drawBigBen(bigBenX, 250);
+
+  // 5. PUENTE Y AGUA
+  drawPuenteYAgua();
+}
+
+
+// FUNCIONES DE DIBUJO CON PRIMITIVAS BÁSICAS
+
+function drawCieloEstrellado() {
+  // Ondas de viento en el cielo
+  stroke(70, 130, 180, 100);
+  strokeWeight(12);
+  noFill();
+  ellipse(250, 150, 400, 120);
+  ellipse(200, 180, 300, 80);
+
+  // Luna / Estrella Principal (Círculos concéntricos)
+  noStroke();
+  fill('#FFDC64');
+  ellipse(400, 100, 110, 110);
+  fill(255, 200, 50);
+  ellipse(400, 100, 80, 80);
+  fill('#FFF096');
+  ellipse(400, 100, 50, 50);
+
+  
+
+  // Estrellas secundarias
+  drawEstrella(80, 80, 40);
+  drawEstrella(200, 90, 30);
+  drawEstrella(320, 180, 35);
+  drawEstrella(100, 200,20);
+  drawEstrella(130, 300,40);
+}
+
+function drawEstrella(x, y, tamano) {
+  fill(255, 215, 0, 120);
+  ellipse(x, y, tamano * 1.4);
+  fill('#FFE664');
+  ellipse(x, y, tamano);
+
+}
+
+function drawEdificiosFondo() {
+  noStroke();
+  
+  // Palacio (Rectángulos)
+  fill(180, 80, 20);
+  rect(30, 500, 150, 150);
+  
+  // Torres secundarias (Triángulos)
+  fill(140, 60, 15);
+  triangle(30, 500, 55, 430, 80, 500);
+  triangle(100, 500, 125, 430, 150, 500);
+ 
+
+  // Ventanas
+  fill(255, 200, 50);
+  rect(50, 520, 15, 20);
+  rect(80, 520, 15, 20);
+  rect(110, 520, 15, 20);
+  rect(50, 560, 15, 20);
+  rect(80, 560, 15, 20);
+  rect(110, 560, 15, 20);
+}
+
+function drawBigBen(x, y) {
+  push();
+  translate(x, y); // Controla la posición 
+
+  noStroke();
+  
+  // Cuerpo principal de la torre
+  fill('#D2781E');
+  rect(0, 120, 60, 280);
+
+  // Estructura superior
+  fill(190, 100, 20);
+  rect(-5, 80, 70, 40);
+
+  // Cúpula / Punta (Triángulo)
+  fill(150, 70, 10);
+  triangle(-5, 80, 30, 0, 65, 80);
+
+  // Reloj Base
+  fill(255, 245, 220);
+  ellipse(30, 100, 48, 48);
+  stroke(50, 30, 10);
+  strokeWeight(2);
+  noFill();
+  ellipse(30, 100, 42, 42);
+
+  // Manecillas del Reloj (Estáticas)
+  stroke(30, 20, 10);
+  strokeWeight(3);
+  line(30, 100, 30, 86);  
+  line(30, 100, 44, 100); 
+
+  // Columnas decorativas (Líneas)
+  stroke(140, 60, 10);
+  strokeWeight(3);
+  line(15, 140, 15, 380);
+  line(30, 140, 30, 380);
+  line(45, 140, 45, 380);
+
+  pop();
+}
+
+function drawPuenteYAgua() {
+  noStroke();
+
+  // Agua
+  fill('#0F2346');
+  rect(0, 630, 500, 70);
+
+  // Reflejos en el agua
+  fill(255, 180, 40, 150);
+  ellipse(250, 650, 80, 8);
+  ellipse(230, 670, 120, 6);
+  ellipse(100, 660, 60, 6);
+
+  // Puente
+  fill(30, 70, 90);
+  rect(280, 580, 220, 60);
+
+  // Arcos del puente
+  fill('#0F2346');
+  ellipse(350, 640, 70, 60);
+  ellipse(440, 640, 70, 60);
+  ellipse(530, 640, 80, 80);
+
+  // Postes de luz
+  stroke(255, 200, 50);
+  strokeWeight(3);
+  line(310, 580, 310, 560);
+  line(400, 580, 400, 560);
+  line(480, 580, 480, 560);
+  
+  noStroke();
+  fill(255, 230, 100);
+  ellipse(310, 557, 10, 10);
+  ellipse(400, 557, 10, 10);
+  ellipse(480, 557, 10, 10);
+  text("X: " + floor(mouseX) + "  Y: " + floor(mouseY), 20, 30);
+}
 
