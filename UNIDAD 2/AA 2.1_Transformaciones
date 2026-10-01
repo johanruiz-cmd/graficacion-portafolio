@@ -48,9 +48,7 @@ function draw() {
   noLoop();
 }
 
-// --------------------------------------------------
-// FUNCIÓN DEL LEÓN (Súper simplificada)
-// --------------------------------------------------
+// FUNCIÓN DEL LEÓN 
 function drawLion(tamMena, colCabeza, colMena, bocaAbierta, esAnciano) {
   stroke(0);
   strokeWeight(3);
@@ -60,7 +58,7 @@ function drawLion(tamMena, colCabeza, colMena, bocaAbierta, esAnciano) {
     fill(colMena);
     ellipse(0, 0, 52 + tamMena, 52 + tamMena);
 
-    // Trazos sencillos de la melena (coordenadas directas)
+    // Trazos de la melena (coordenadas directas)
     strokeWeight(2);
     line(0, -30, 0, -22);   // Arriba
     line(0, 30, 0, 22);     // Abajo
