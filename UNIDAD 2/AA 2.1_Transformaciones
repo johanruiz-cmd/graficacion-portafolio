@@ -53,17 +53,25 @@ function drawLion(tamMena, colCabeza, colMena, bocaAbierta, esAnciano) {
   stroke(0);
   strokeWeight(3);
 
-  // 1. MELENA Y DETALLES DE LÍNEAS
+  // 1. PATAS (Se dibujan primero para quedar al fondo)
+  // Calculamos la posición Y para que se adapten a la melena si la hay
+  let posYPatas = (tamMena > 0) ? (26 + tamMena / 2) : 22;
+
+  fill(colCabeza);
+  ellipse(-10, posYPatas, 14, 14); // Pata izquierda
+  ellipse(10, posYPatas, 14, 14);  // Pata derecha
+
+  // 2. MELENA Y DETALLES DE LÍNEAS
   if (tamMena > 0) {
     fill(colMena);
     ellipse(0, 0, 52 + tamMena, 52 + tamMena);
 
     // Trazos de la melena (coordenadas directas)
     strokeWeight(2);
-    line(0, -30, 0, -22);   // Arriba
-    line(0, 30, 0, 22);     // Abajo
-    line(-30, 0, -22, 0);   // Izquierda
-    line(30, 0, 22, 0);     // Derecha
+    line(0, -30, 0, -22);     // Arriba
+    line(0, 30, 0, 22);       // Abajo
+    line(-30, 0, -22, 0);     // Izquierda
+    line(30, 0, 22, 0);       // Derecha
     line(-20, -20, -15, -15); // Diagonal Arriba-Izquierda
     line(20, -20, 15, -15);   // Diagonal Arriba-Derecha
     line(-20, 20, -15, 15);   // Diagonal Abajo-Izquierda
@@ -71,19 +79,19 @@ function drawLion(tamMena, colCabeza, colMena, bocaAbierta, esAnciano) {
     strokeWeight(3);
   }
 
-  // 2. OREJAS
+  // 3. OREJAS
   fill(colCabeza);
   ellipse(-20, -20, 16, 16);
   ellipse(20, -20, 16, 16);
 
-  // 3. CABEZA Y OJOS
+  // 4. CABEZA Y OJOS
   ellipse(0, 0, 50, 48);
 
   fill(0);
   ellipse(-10, -5, 7, 7);
   ellipse(10, -5, 7, 7);
 
-  // 4. CEJAS CANAS (Anciano)
+  // 5. CEJAS CANAS (Anciano)
   if (esAnciano) {
     stroke(255);
     strokeWeight(3);
@@ -92,14 +100,14 @@ function drawLion(tamMena, colCabeza, colMena, bocaAbierta, esAnciano) {
     stroke(0);
   }
 
-  // 5. HOCICO Y NARIZ
+  // 6. HOCICO Y NARIZ
   fill(255, 245, 220);
   ellipse(0, 8, 26, 18);
 
   fill(0);
   triangle(-5, 4, 5, 4, 0, 9);
 
-  // 6. BOCA
+  // 7. BOCA
   if (bocaAbierta) {
     fill(120, 40, 40);
     arc(0, 9, 14, 12, 0, PI);
