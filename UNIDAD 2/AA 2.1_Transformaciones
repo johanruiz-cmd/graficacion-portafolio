@@ -1,0 +1,123 @@
+function setup() {
+  createCanvas(800, 250);
+}
+
+function draw() {
+  background(240);
+
+  // --- ETAPA 1: BEBÉ ---
+  push();
+  translate(80, 110);
+  scale(0.75);
+  rotate(radians(-4));
+  drawLion(0, color(245, 220, 160), color(0), true, false);
+  pop();
+
+  // --- ETAPA 2: CACHORRO ---
+  push();
+  translate(220, 110);
+  scale(0.85);
+  rotate(radians(2));
+  drawLion(12, color(225, 175, 100), color(170, 105, 40), false, false);
+  pop();
+
+  // --- ETAPA 3: JOVEN ---
+  push();
+  translate(360, 110);
+  scale(1.0);
+  rotate(radians(-2));
+  drawLion(24, color(200, 135, 60), color(135, 65, 15), false, false);
+  pop();
+
+  // --- ETAPA 4: ADULTO ---
+  push();
+  translate(520, 110);
+  scale(1.2);
+  rotate(radians(2));
+  drawLion(38, color(150, 80, 20), color(80, 30, 5), false, false);
+  pop();
+
+  // --- ETAPA 5: ANCIANO ---
+  push();
+  translate(680, 110);
+  scale(1.2);
+  rotate(radians(4));
+  drawLion(38, color(140, 135, 130), color(90, 85, 80), false, true);
+  pop();
+
+  noLoop();
+}
+
+// --------------------------------------------------
+// FUNCIÓN DEL LEÓN (Súper simplificada)
+// --------------------------------------------------
+function drawLion(tamMena, colCabeza, colMena, bocaAbierta, esAnciano) {
+  stroke(0);
+  strokeWeight(3);
+
+  // 1. MELENA Y DETALLES DE LÍNEAS
+  if (tamMena > 0) {
+    fill(colMena);
+    ellipse(0, 0, 52 + tamMena, 52 + tamMena);
+
+    // Trazos sencillos de la melena (coordenadas directas)
+    strokeWeight(2);
+    line(0, -30, 0, -22);   // Arriba
+    line(0, 30, 0, 22);     // Abajo
+    line(-30, 0, -22, 0);   // Izquierda
+    line(30, 0, 22, 0);     // Derecha
+    line(-20, -20, -15, -15); // Diagonal Arriba-Izquierda
+    line(20, -20, 15, -15);   // Diagonal Arriba-Derecha
+    line(-20, 20, -15, 15);   // Diagonal Abajo-Izquierda
+    line(20, 20, 15, 15);     // Diagonal Abajo-Derecha
+    strokeWeight(3);
+  }
+
+  // 2. OREJAS
+  fill(colCabeza);
+  ellipse(-20, -20, 16, 16);
+  ellipse(20, -20, 16, 16);
+
+  // 3. CABEZA Y OJOS
+  ellipse(0, 0, 50, 48);
+
+  fill(0);
+  ellipse(-10, -5, 7, 7);
+  ellipse(10, -5, 7, 7);
+
+  // 4. CEJAS CANAS (Anciano)
+  if (esAnciano) {
+    stroke(255);
+    strokeWeight(3);
+    line(-15, -12, -6, -9);
+    line(6, -9, 15, -12);
+    stroke(0);
+  }
+
+  // 5. HOCICO Y NARIZ
+  fill(255, 245, 220);
+  ellipse(0, 8, 26, 18);
+
+  fill(0);
+  triangle(-5, 4, 5, 4, 0, 9);
+
+  // 6. BOCA
+  if (bocaAbierta) {
+    fill(120, 40, 40);
+    arc(0, 9, 14, 12, 0, PI);
+    
+    // Dientes
+    fill(255);
+    noStroke();
+    triangle(-4, 9, -2, 9, -3, 12);
+    triangle(2, 9, 4, 9, 3, 12);
+    
+    stroke(0);
+    strokeWeight(3);
+  } else {
+    line(0, 8, 0, 12);
+    noFill();
+    arc(-3, 12, 6, 4, 0, PI);
+    arc(3, 12, 6, 4, 0, PI);
+  }
+}
