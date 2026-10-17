@@ -1,0 +1,811 @@
+// =================================================================
+// ALTAR DIGITAL ISC & COCO - VELOCIDAD DE VELAS SUAVIZADA
+// Proyecto AA 2.2: Escenario Dinámico
+// =================================================================
+
+let modoEscena = true;      // true: Fiesta Tradicional / false: Red Matrix
+let velasEncendidas = true; // Interruptor de llamas
+let particulasMouse = [];   // Destellos al hacer clic
+let petalosCaida = [];      // Lluvia de pétalos de cempasúchil
+let petalosSuelo = [];      // Mosaico del camino de cempasúchil
+
+// Variables de estado de animación para la Calavera ISC
+let estadoCalavera = "idle"; // "idle", "saludar", "comer"
+let timerAccionCalavera = 0;
+
+function setup() {
+  p5.instance._friendlyErrorSystem = false; // Desactiva falsas alarmas de bucles
+  createCanvas(windowWidth, windowHeight);
+  angleMode(DEGREES);
+  rectMode(CENTER);
+  ellipseMode(CENTER);
+
+  // Inicializar lluvia de pétalos (cantidad moderada)
+  petalosCaida = [];
+  for (let i = 0; i < 35; i++) {
+    petalosCaida.push({
+      x: random(width),
+      y: random(-height, height),
+      tam: random(6, 12),
+      vaciaY: random(1.0, 2.2),
+      oscilacionX: random(0.3, 1.2),
+      fase: random(360),
+      rotacion: random(360),
+      vRot: random(-2.5, 2.5)
+    });
+  }
+
+  generarPetalosSuelo();
+}
+
+function generarPetalosSuelo() {
+  petalosSuelo = [];
+  for (let i = 0; i < 40; i++) {
+    petalosSuelo.push({
+      t: random(1),
+      offsetRel: random(-0.5, 0.5),
+      alfa: random(180, 255),
+      g: random(110, 210)
+    });
+  }
+}
+
+function draw() {
+  // 1. FONDO
+  if (modoEscena) {
+    background(16, 9, 28);
+    dibujarResplandorFondo();
+  } else {
+    background(6, 12, 20);
+    dibujarEfectoMatrix();
+  }
+
+  // Papel Picado
+  dibujarPapelPicadoSuperior();
+
+  // 2. CAMINO Y VELADORAS LATERALES
+  let xCentro = width / 2;
+  let yBaseAltar = height * 0.74;
+
+  dibujarCaminoCempasuchilPerspectiva(xCentro, yBaseAltar);
+  dibujarVeladorasCaminoCempasuchil(xCentro, yBaseAltar);
+
+  // 3. ESTRUCTURA ELEVADA DEL ALTAR Y SUS ELEMENTOS
+  push();
+
+  dibujarPatasDeMesa(xCentro, yBaseAltar);
+  dibujarArcoCempasuchilMagnifico(xCentro, yBaseAltar - 110);
+  dibujarEscalonesAltar(xCentro, yBaseAltar);
+
+  // Veladoras organizadas en el Altar
+  dibujarVeladorasEnAltar(xCentro, yBaseAltar);
+
+  // Marcos de Retratos
+  dibujarRetratosTradicionales(xCentro, yBaseAltar);
+
+  // OFRENDAS TRADICIONALES
+  dibujarOfrendasAltar(xCentro, yBaseAltar);
+
+  // CALAVERITA ANIMADA INTERACTIVA CON GORRA Y PLAYERA ISC
+  dibujarCalaveraISCAnimada(xCentro, yBaseAltar - 58);
+
+  // Guitarra Blanca de Miguel/Héctor
+  dibujarGuitarraCocoRecargada(xCentro + width * 0.27, yBaseAltar + 18);
+
+  // Calaveritas estáticas en las esquinas inferiores
+  dibujarCalaveraGlitch(xCentro - width * 0.32, yBaseAltar - 5);
+  dibujarCalaveraGlitch(xCentro + width * 0.32, yBaseAltar - 5);
+
+  pop();
+
+  // 4. SISTEMA DE PARTÍCULAS
+  actualizarYRenderizarPetalos();
+  actualizarYRenderizarDestellos();
+
+  // Actualizar tiempo de animación de la calaverita
+  if (timerAccionCalavera > 0) {
+    timerAccionCalavera--;
+    if (timerAccionCalavera === 0) {
+      estadoCalavera = "idle";
+    }
+  }
+
+  // 5. LEYENDA E INSTRUCCIONES
+  dibujarBarraControles();
+}
+
+// -----------------------------------------------------------------
+// PERSONAJE: CALAVERITA DE ISC ANIMADA E INTERACTIVA
+// -----------------------------------------------------------------
+
+function dibujarCalaveraISCAnimada(cx, cy) {
+  push();
+  translate(cx, cy);
+
+  let escala = map(width, 400, 1400, 0.65, 1.05, true);
+  scale(escala);
+
+  let oscY = sin(frameCount * 4) * 2;
+  translate(0, oscY);
+
+  fill(15, 25, 45);
+  stroke(0, 255, 200);
+  strokeWeight(1.8);
+  rect(0, 16, 32, 22, 4);
+
+  noStroke();
+  fill(0, 255, 200);
+  textAlign(CENTER, CENTER);
+  textSize(7);
+  textStyle(BOLD);
+  text("ISC", 0, 16);
+
+  fill(250);
+  stroke(40);
+  strokeWeight(2);
+  ellipse(0, -6, 38, 32);
+
+  rect(0, 8, 16, 8, 2);
+  stroke(80);
+  strokeWeight(1);
+  line(-4, 5, -4, 10);
+  line(0, 5, 0, 10);
+  line(4, 5, 4, 10);
+
+  let parpadeo = sin(frameCount * 6) > 0.95 ? 1 : 8;
+  fill(0, 255, 200);
+  noStroke();
+  ellipse(-8, -8, 8, parpadeo);
+  ellipse(8, -8, 8, parpadeo);
+
+  fill(30);
+  triangle(-2, -3, 2, -3, 0, 0);
+
+  push();
+  translate(0, -18);
+  fill(0, 180, 120);
+  stroke(0, 255, 180);
+  strokeWeight(1.5);
+  arc(0, 2, 38, 22, 180, 360, CHORD);
+
+  fill(0, 220, 140);
+  ellipse(6, 4, 32, 8);
+
+  fill(255);
+  noStroke();
+  textSize(6.5);
+  textStyle(BOLD);
+  text("ISC", -4, -3);
+  pop();
+
+  if (estadoCalavera === "saludar") {
+    push();
+    translate(18, 10);
+    let anguloMano = sin(frameCount * 25) * 20;
+    rotate(-110 + anguloMano);
+    stroke(250);
+    strokeWeight(4);
+    line(0, 0, 16, 0);
+    fill(250);
+    noStroke();
+    ellipse(18, 0, 6, 6);
+    pop();
+  } else if (estadoCalavera === "comer") {
+    push();
+    translate(14, 12);
+    rotate(-50);
+    stroke(250);
+    strokeWeight(4);
+    line(0, 0, 14, -8);
+
+    fill(210, 140, 50);
+    noStroke();
+    ellipse(16, -10, 10, 8);
+    fill(255, 230, 180);
+    ellipse(16, -12, 3, 3);
+    pop();
+
+    if (frameCount % 6 === 0) {
+      particulasMouse.push({
+        x: cx + random(-6, 6),
+        y: cy + 4,
+        vx: random(-1.5, 1.5),
+        vy: random(1, 3),
+        tam: random(2, 4),
+        vida: 120,
+        r: 230, g: 160, b: 60
+      });
+    }
+  } else {
+    stroke(250);
+    strokeWeight(3.5);
+    line(-16, 12, -20, 22);
+    line(16, 12, 20, 22);
+  }
+
+  pop();
+}
+
+// -----------------------------------------------------------------
+// OFRENDAS TRADICIONALES
+// -----------------------------------------------------------------
+
+function dibujarOfrendasAltar(xCentro, yBase) {
+  let offsetNivel2 = width * 0.17;
+  let offsetNivel3 = width * 0.21;
+
+  dibujarPlatoTamales(xCentro - offsetNivel2, yBase - 48);
+  dibujarTazonDulces(xCentro + offsetNivel2, yBase - 48);
+  dibujarCerveza(xCentro - offsetNivel3, yBase - 2);
+  dibujarPlatoMole(xCentro + offsetNivel3, yBase - 2);
+}
+
+function dibujarPlatoTamales(x, y) {
+  push();
+  translate(x, y);
+  let escala = map(width, 400, 1400, 0.55, 1.0, true);
+  scale(escala);
+
+  fill(160, 80, 40);
+  stroke(100, 45, 20);
+  strokeWeight(1.2);
+  ellipse(0, 0, 30, 12);
+
+  fill(180, 170, 90);
+  stroke(130, 120, 50);
+  rect(-5, -4, 13, 7, 3);
+  rect(4, -5, 13, 7, 3);
+  pop();
+}
+
+function dibujarTazonDulces(x, y) {
+  push();
+  translate(x, y);
+  let escala = map(width, 400, 1400, 0.55, 1.0, true);
+  scale(escala);
+
+  fill(170, 75, 35);
+  stroke(110, 40, 15);
+  strokeWeight(1.2);
+  arc(0, 2, 26, 16, 0, 180, CHORD);
+
+  noStroke();
+  fill(255, 100, 180);
+  ellipse(-5, -2, 6, 6);
+  fill(255, 230, 0);
+  ellipse(0, -4, 7, 7);
+  fill(0, 200, 180);
+  ellipse(5, -2, 6, 6);
+  pop();
+}
+
+function dibujarCerveza(x, y) {
+  push();
+  translate(x, y);
+  let escala = map(width, 400, 1400, 0.55, 1.0, true);
+  scale(escala);
+
+  fill(30, 80, 40);
+  stroke(15, 50, 25);
+  strokeWeight(1);
+  rect(-8, -4, 8, 15, 2);
+  rect(-8, -13, 4, 9, 1);
+
+  fill(230, 230, 240, 180);
+  stroke(180);
+  rect(5, -2, 11, 13, 2);
+  fill(245, 180, 30);
+  noStroke();
+  rect(5, 0, 9, 9);
+  fill(255);
+  ellipse(2, -8, 5, 5);
+  ellipse(5, -9, 6, 6);
+  ellipse(8, -8, 5, 5);
+  pop();
+}
+
+function dibujarPlatoMole(x, y) {
+  push();
+  translate(x, y);
+  let escala = map(width, 400, 1400, 0.55, 1.0, true);
+  scale(escala);
+
+  fill(180, 85, 45);
+  stroke(120, 50, 25);
+  strokeWeight(1.2);
+  ellipse(0, 0, 28, 11);
+
+  fill(70, 35, 15);
+  noStroke();
+  ellipse(0, -1, 20, 7);
+  fill(255, 230, 180);
+  ellipse(-3, -2, 2, 2);
+  ellipse(3, -1, 2, 2);
+  pop();
+}
+
+// -----------------------------------------------------------------
+// ARCO DE CEMPASÚCHIL Y CRUZ
+// -----------------------------------------------------------------
+
+function dibujarArcoCempasuchilMagnifico(cx, cy) {
+  push();
+  translate(cx, cy);
+
+  let radioX = width * 0.38;
+  let radioY = height * 0.44;
+
+  noFill();
+  stroke(255, 120, 0, 45);
+  strokeWeight(38);
+  arc(0, 0, radioX, radioY, 180, 360);
+
+  stroke(255, 180, 0, 80);
+  strokeWeight(26);
+  arc(0, 0, radioX, radioY, 180, 360);
+
+  stroke(210, 140, 20);
+  strokeWeight(12);
+  arc(0, 0, radioX, radioY, 180, 360);
+
+  noStroke();
+  let numFlores = 24;
+  for (let i = 0; i <= numFlores; i++) {
+    let angulo = map(i, 0, numFlores, 180, 360);
+    let fx = (radioX / 2) * cos(angulo);
+    let fy = (radioY / 2) * sin(angulo);
+
+    push();
+    translate(fx, fy);
+    fill(255, 140, 0);
+    ellipse(0, 0, 22, 22);
+    fill(255, 200, 0);
+    ellipse(0, 0, 15, 15);
+    fill(255, 240, 100);
+    ellipse(0, 0, 8, 8);
+    pop();
+  }
+
+  push();
+  translate(0, -radioY / 2 - 12);
+  fill(255, 220, 100, 100);
+  ellipse(0, 0, 36, 36);
+
+  fill(255, 190, 30);
+  stroke(255, 240, 150);
+  strokeWeight(2);
+
+  rect(0, 0, 12, 32, 3);
+  rect(0, -4, 26, 11, 3);
+
+  fill(0, 255, 200);
+  noStroke();
+  rect(0, -4, 6, 6, 1);
+  pop();
+
+  pop();
+}
+
+// -----------------------------------------------------------------
+// CAMINO Y VELADORAS EN PERSPECTIVA
+// -----------------------------------------------------------------
+
+function dibujarCaminoCempasuchilPerspectiva(xCentro, yBase) {
+  push();
+  let yInicio = yBase + 10;
+  let yFin = height;
+
+  noStroke();
+  fill(240, 120, 0, 190);
+  beginShape();
+  vertex(xCentro - width * 0.28, yInicio);
+  vertex(xCentro + width * 0.28, yInicio);
+  vertex(width * 0.95, yFin);
+  vertex(width * 0.05, yFin);
+  endShape(CLOSE);
+
+  fill(255, 175, 0, 110);
+  beginShape();
+  vertex(xCentro - width * 0.18, yInicio);
+  vertex(xCentro + width * 0.18, yInicio);
+  vertex(width * 0.80, yFin);
+  vertex(width * 0.20, yFin);
+  endShape(CLOSE);
+
+  let limite = min(petalosSuelo.length, 50);
+  for (let i = 0; i < limite; i++) {
+    let p = petalosSuelo[i];
+    let y = lerp(yInicio, yFin, p.t);
+    let anchoActual = lerp(width * 0.56, width * 0.9, p.t);
+    let x = xCentro + p.offsetRel * anchoActual;
+    let tam = lerp(3, 12, p.t);
+
+    fill(255, p.g, 0, p.alfa);
+    ellipse(x, y, tam * 1.6, tam);
+  }
+  pop();
+}
+
+function dibujarVeladorasCaminoCempasuchil(xCentro, yBase) {
+  let numVelas = 8;
+  let yInicio = yBase + 12;
+  let yFin = height - 12;
+
+  for (let i = 0; i < numVelas; i++) {
+    let t = i / (numVelas - 1);
+    let yVela = lerp(yInicio, yFin, t);
+
+    let offsetAncho = lerp(width * 0.29, width * 0.47, t);
+    let xIzq = xCentro - offsetAncho;
+    let xDer = xCentro + offsetAncho;
+
+    let escala = lerp(0.5, 1.25, t);
+
+    dibujarVeladoraIndividual(xIzq, yVela, escala);
+    dibujarVeladoraIndividual(xDer, yVela, escala);
+  }
+}
+
+function dibujarVeladoraIndividual(x, y, escala) {
+  push();
+  translate(x, y);
+  scale(escala);
+
+  noStroke();
+  fill(10, 5, 18, 120);
+  ellipse(0, 14, 24, 8);
+
+  fill(245, 245, 250, 230);
+  stroke(170, 170, 190);
+  strokeWeight(1.2);
+  rect(0, 0, 16, 28, 3);
+
+  fill(0, 255, 200, 210);
+  noStroke();
+  rect(0, 4, 11, 3);
+
+  if (velasEncendidas) {
+    push();
+    translate(0, -17);
+    // VELOCIDAD SUAVIZADA: Se redujo el multiplicador de frameCount (de 14 y 18 a 4 y 5)
+    let oscX = map(sin(frameCount * 4 + x * 7), -1, 1, 0.88, 1.12);
+    let oscY = map(cos(frameCount * 5 + y * 7), -1, 1, 0.90, 1.15);
+    scale(oscX, oscY);
+
+    fill(255, 130, 0, 75);
+    ellipse(0, 0, 24, 34);
+
+    fill(255, 110, 0, 230);
+    ellipse(0, 0, 12, 22);
+
+    fill(255, 235, 80);
+    ellipse(0, 2, 6, 11);
+    pop();
+  }
+  pop();
+}
+
+// -----------------------------------------------------------------
+// ESCALONES DEL ALTAR Y COMPONENTES
+// -----------------------------------------------------------------
+
+function dibujarPatasDeMesa(x, y) {
+  push();
+  translate(x, y);
+  fill(14, 20, 32);
+  stroke(0, 255, 200, 160);
+  strokeWeight(2);
+
+  let anchoMesa = width * 0.64;
+  rect(-anchoMesa * 0.44, 28, 18, 56, 4);
+  rect(anchoMesa * 0.44, 28, 18, 56, 4);
+  pop();
+}
+
+function dibujarEscalonesAltar(x, y) {
+  push();
+  translate(x, y);
+
+  fill(75, 18, 115);
+  stroke(135, 45, 185);
+  strokeWeight(2);
+  rect(0, 0, width * 0.66, 46, 6);
+  dibujarCenefaPapel(0, 18, width * 0.66, color(0, 230, 255));
+
+  fill(95, 24, 140);
+  rect(0, -46, width * 0.48, 46, 6);
+  dibujarCenefaPapel(0, -28, width * 0.48, color(255, 0, 140));
+
+  fill(115, 30, 165);
+  rect(0, -92, width * 0.30, 46, 6);
+  dibujarCenefaPapel(0, -74, width * 0.30, color(255, 200, 0));
+
+  pop();
+}
+
+function dibujarCenefaPapel(cx, cy, ancho, col) {
+  push();
+  translate(cx, cy);
+  fill(col);
+  noStroke();
+
+  let num = max(1, floor(ancho / 20));
+  let paso = ancho / num;
+
+  for (let i = 0; i < num; i++) {
+    let xOffset = -ancho / 2 + paso * i + paso / 2;
+    rect(xOffset, 0, paso - 4, 8, 2);
+    ellipse(xOffset, 4, 4, 4);
+  }
+  pop();
+}
+
+function dibujarVeladorasEnAltar(x, y) {
+  dibujarVeladoraIndividual(x - width * 0.10, y - 114, 0.72);
+  dibujarVeladoraIndividual(x + width * 0.10, y - 114, 0.72);
+
+  dibujarVeladoraIndividual(x - width * 0.19, y - 68, 0.82);
+  dibujarVeladoraIndividual(x + width * 0.19, y - 68, 0.82);
+
+  dibujarVeladoraIndividual(x - width * 0.26, y - 22, 0.92);
+  dibujarVeladoraIndividual(x - width * 0.13, y - 22, 0.92);
+  dibujarVeladoraIndividual(x + width * 0.13, y - 22, 0.92);
+}
+
+function dibujarRetratosTradicionales(x, y) {
+  dibujarMarcoRetrato(x, y - 116, 28, 36);
+  dibujarMarcoRetrato(x - width * 0.11, y - 70, 30, 38);
+  dibujarMarcoRetrato(x + width * 0.11, y - 70, 30, 38);
+}
+
+function dibujarMarcoRetrato(rx, ry, w, h) {
+  push();
+  translate(rx, ry);
+
+  fill(220, 175, 50);
+  stroke(255, 230, 120);
+  strokeWeight(2);
+  rect(0, 0, w, h, 4);
+
+  fill(35, 25, 20);
+  noStroke();
+  rect(0, 0, w - 6, h - 6, 2);
+
+  fill(215, 175, 135);
+  ellipse(0, -3, w * 0.36, w * 0.36);
+  fill(150, 110, 80);
+  arc(0, h * 0.3, w * 0.62, h * 0.52, 180, 360);
+  pop();
+}
+
+function dibujarGuitarraCocoRecargada(gx, gy) {
+  push();
+  translate(gx, gy);
+
+  let escala = map(width, 400, 1400, 0.6, 1.0, true);
+  scale(escala);
+  rotate(-16);
+
+  fill(250, 250, 255);
+  stroke(170, 170, 190);
+  strokeWeight(1.5);
+  ellipse(0, 16, 36, 44);
+  ellipse(0, -10, 28, 32);
+
+  fill(25);
+  stroke(210, 170, 50);
+  strokeWeight(1.6);
+  ellipse(0, -2, 12, 12);
+
+  fill(95, 55, 25);
+  stroke(50, 25, 10);
+  strokeWeight(1);
+  rect(0, -48, 8, 52);
+
+  fill(252);
+  stroke(170);
+  rect(0, -78, 14, 18, 3);
+  fill(10);
+  ellipse(-3, -80, 3, 3);
+  ellipse(3, -80, 3, 3);
+
+  stroke(210, 210, 240, 210);
+  strokeWeight(0.8);
+  for (let c = -2; c <= 2; c += 1) {
+    line(c, 26, c, -74);
+  }
+  pop();
+}
+
+function dibujarCalaveraGlitch(kx, ky) {
+  push();
+  translate(kx, ky);
+
+  let escala = map(width, 400, 1400, 0.6, 1.0, true);
+  scale(escala);
+
+  fill(248);
+  stroke(35);
+  strokeWeight(1.5);
+  ellipse(0, 0, 26, 24);
+  rect(0, 9, 11, 7, 2);
+
+  fill(255, 0, 120);
+  ellipse(-5, -2, 7, 7);
+  ellipse(5, -2, 7, 7);
+  fill(15);
+  ellipse(-5, -2, 3, 3);
+  ellipse(5, -2, 3, 3);
+  pop();
+}
+
+// -----------------------------------------------------------------
+// PAPEL PICADO Y EFECTOS
+// -----------------------------------------------------------------
+
+function dibujarPapelPicadoSuperior() {
+  let colores = [
+    color(0, 190, 230),
+    color(245, 0, 125),
+    color(155, 35, 210),
+    color(255, 185, 0),
+    color(0, 210, 120)
+  ];
+  let num = 10;
+  let ancho = width / num;
+
+  stroke(255, 90);
+  strokeWeight(1);
+  noFill();
+  beginShape();
+  let pasos = 20;
+  for (let i = 0; i <= pasos; i++) {
+    let x = (width / pasos) * i;
+    let y = 16 + sin(x * 0.6 + frameCount * 1.5) * 5;
+    vertex(x, y);
+  }
+  endShape();
+
+  for (let i = 0; i < num; i++) {
+    push();
+    let x = i * ancho + ancho / 2;
+    let yCuerda = 16 + sin(x * 0.6 + frameCount * 1.5) * 5;
+    translate(x, yCuerda + 18);
+    rotate(sin(frameCount * 2 + i * 25) * 3.5);
+
+    fill(colores[i % colores.length]);
+    noStroke();
+    rect(0, 0, max(1, ancho - 10), 36, 3);
+
+    fill(16, 9, 28);
+    ellipse(0, -4, 8, 8);
+    rect(-6, 6, 4, 4);
+    rect(6, 6, 4, 4);
+    pop();
+  }
+}
+
+function dibujarResplandorFondo() {
+  noStroke();
+  fill(255, 130, 0, 16);
+  ellipse(width / 2, height / 2, width * 0.75, height * 0.75);
+}
+
+function dibujarEfectoMatrix() {
+  fill(0, 255, 120, 45);
+  textSize(11);
+  textFont('monospace');
+  
+  let columnas = 10;
+  let filas = 8;
+  let pasoX = width / columnas;
+  let pasoY = height / filas;
+
+  for (let i = 0; i < columnas; i++) {
+    for (let j = 0; j < filas; j++) {
+      let x = i * pasoX + 20;
+      let y = j * pasoY + 30;
+      let charBit = (i + j + frameCount) % 2 === 0 ? "1" : "0";
+      text(charBit, x, y);
+    }
+  }
+}
+
+// -----------------------------------------------------------------
+// ANIMACIONES Y SISTEMA DE PARTÍCULAS
+// -----------------------------------------------------------------
+
+function actualizarYRenderizarPetalos() {
+  for (let i = 0; i < petalosCaida.length; i++) {
+    let p = petalosCaida[i];
+    p.y += p.vaciaY;
+    p.x += sin(frameCount * p.oscilacionX + p.fase) * 0.8;
+    p.rotacion += p.vRot;
+
+    if (p.y > height + 20) {
+      p.y = -20;
+      p.x = random(width);
+    }
+
+    push();
+    translate(p.x, p.y);
+    rotate(p.rotacion);
+    fill(255, 160, 0, 220);
+    noStroke();
+    ellipse(0, 0, p.tam, p.tam * 0.5);
+    pop();
+  }
+}
+
+function actualizarYRenderizarDestellos() {
+  if (particulasMouse.length > 30) {
+    particulasMouse.splice(0, particulasMouse.length - 30);
+  }
+
+  for (let i = particulasMouse.length - 1; i >= 0; i--) {
+    let pm = particulasMouse[i];
+    pm.x += pm.vx;
+    pm.y += pm.vy;
+    pm.vida -= 4.0;
+
+    noStroke();
+    fill(pm.r, pm.g, pm.b, pm.vida);
+    ellipse(pm.x, pm.y, pm.tam);
+
+    if (pm.vida <= 0) {
+      particulasMouse.splice(i, 1);
+    }
+  }
+}
+
+function dibujarBarraControles() {
+  push();
+  fill(255, 220);
+  noStroke();
+  textSize(12);
+  textAlign(LEFT, BOTTOM);
+  text(" [ESPACIO] Fondo  |  [V] Velas  |  [S] Saludo Calavera  |  [C] Comer Ofrenda", 20, height - 16);
+  pop();
+}
+
+// -----------------------------------------------------------------
+// EVENTOS TECLADO Y MOUSE
+// -----------------------------------------------------------------
+
+function mousePressed() {
+  for (let i = 0; i < 8; i++) {
+    particulasMouse.push({
+      x: mouseX,
+      y: mouseY,
+      vx: random(-3, 3),
+      vy: random(-3, 3),
+      tam: random(4, 8),
+      vida: 255,
+      r: random(100, 255),
+      g: 255,
+      b: random(150, 255)
+    });
+  }
+}
+
+function keyPressed() {
+  if (key === ' ' || keyCode === 32) {
+    modoEscena = !modoEscena;
+  }
+  if (key === 'v' || key === 'V') {
+    velasEncendidas = !velasEncendidas;
+  }
+  if (key === 's' || key === 'S') {
+    estadoCalavera = "saludar";
+    timerAccionCalavera = 60;
+  }
+  if (key === 'c' || key === 'C') {
+    estadoCalavera = "comer";
+    timerAccionCalavera = 80;
+  }
+}
+
+function windowResized() {
+  resizeCanvas(windowWidth, windowHeight);
+  generarPetalosSuelo();
+}
